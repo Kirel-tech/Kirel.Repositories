@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Kirel.Repositories.Interfaces;
-using Kirel.Repositories.Persistance;
 using Kirel.Repositories.Sorts;
+using Kirel.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kirel.Repositories.Infrastructure.Generics;
@@ -9,9 +9,10 @@ namespace Kirel.Repositories.Infrastructure.Generics;
 /// <summary>
 /// Generalized Repository class type 
 /// </summary>
-public class KirelGenericEntityFrameworkRepository<TKey, TEntity> : IGenericRepository<TKey, TEntity> 
+public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : IKirelGenericEntityFrameworkRepository<TKey, TEntity> 
     where TEntity : class, ICreatedAtTrackedEntity, IKeyEntity<TKey> 
     where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
+    where TDbContext : DbContext
 {
     private readonly DbContext _dbContext;
     internal virtual IQueryable<TEntity> _reader
