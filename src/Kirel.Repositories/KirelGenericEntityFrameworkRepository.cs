@@ -14,7 +14,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
     where TDbContext : DbContext
 {
-    private readonly DbContext _dbContext;
+    private readonly TDbContext _dbContext;
     internal virtual IQueryable<TEntity> _reader
     {
         get => _writer.AsQueryable();
@@ -27,7 +27,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     /// GenericRepository constructor
     /// </summary>
     /// <param name="context">DbContext</param>
-    public KirelGenericEntityFrameworkRepository(DbContext context)
+    public KirelGenericEntityFrameworkRepository(TDbContext context)
     {
         _dbContext = context;
     }

@@ -8,7 +8,9 @@ namespace Kirel.Repositories.Interfaces;
 /// </summary>
 /// <typeparam name="TKey">Type of special entity key</typeparam>
 /// <typeparam name="TEntity">Type of entity</typeparam>
-public interface IKirelGenericEntityFrameworkRepository<in TKey, TEntity> where TEntity : IKeyEntity<TKey> where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
+public interface IKirelGenericEntityFrameworkRepository<in TKey, TEntity> 
+    where TEntity : class, ICreatedAtTrackedEntity, IKeyEntity<TKey> 
+    where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
 {
     /// <summary>
     /// Add new entity
