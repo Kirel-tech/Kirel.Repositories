@@ -1,0 +1,9 @@
+﻿@startuml
+
+enum TimeUnit {
+    Desc
+    --
+    Asc
+}
+
+@enduml

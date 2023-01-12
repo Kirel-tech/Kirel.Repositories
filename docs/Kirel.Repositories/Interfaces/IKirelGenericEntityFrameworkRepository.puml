@@ -1,0 +1,57 @@
+﻿@startuml
+
+interface IKirelGenericEntityFrameworkRepository<in TKey, TEntity> {
+    +Insert Task<TEntity>(TEntity entity)
+    --
+    +GetById Task<TEntity>(TKey id)
+    --
+    +Delete Task(TKey id)
+    --
+    +Update Task<TEntity>(TEntity entity)
+    --
+    +GetList Task<IEnumerable<TEntity>>(Expression<Func<TEntity, bool>>? expression,
+                     Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy,
+                     Func<IQueryable<TEntity>, IQueryable<TEntity>>? includes, int page,
+                     int pageSize)
+    --
+    +GetList_ Task<IEnumerable<TEntity>>(string search, string orderBy,
+                      SortDirection orderDirection,
+                      int page, int pageSize)
+    --
+    +Count Task<int>(Expression<Func<TEntity, bool>>? expression)
+    --
+    +Count_ Task<int>(string search)
+}
+note left of IKirelGenericEntityFrameworkRepository::Insert
+  Add new entity
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::GetById
+  Get entity by ID entity
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::Delete
+  Delete Entity
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::Update
+  Changes the accepted entity
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::GetList
+  Get entity list
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::GetList_
+  Get Entity List (search in all fields)
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::Count
+  Count Elements with specified filter
+end note
+    
+note left of IKirelGenericEntityFrameworkRepository::Count_
+  Count Elements with specified filter
+end note
+
+@enduml

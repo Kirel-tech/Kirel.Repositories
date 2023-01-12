@@ -1,0 +1,11 @@
+﻿@startuml
+
+interface ICreatedAtTrackedEntity{
+    +Created : DateTime
+}
+
+note left of ICreatedAtTrackedEntity::Created
+  Created at DateTime UTC
+end note
+
+@enduml
