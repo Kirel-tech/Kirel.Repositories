@@ -4,9 +4,12 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Kirel.Shared" Version="0.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.12" />
     </ItemGroup>
 
