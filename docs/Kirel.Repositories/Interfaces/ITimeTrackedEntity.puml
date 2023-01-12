@@ -1,0 +1,15 @@
+﻿@startuml
+
+!include ICreatedAtTrackedEntity.puml
+
+interface ITimeTrackedEntity {
+    +Updated : DateTime
+}
+
+ITimeTrackedEntity--|>ICreatedAtTrackedEntity
+
+note left of ITimeTrackedEntity::Updated
+  Last modified DateTime UTC
+end note
+    
+@enduml

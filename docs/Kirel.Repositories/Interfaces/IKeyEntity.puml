@@ -1,0 +1,11 @@
+﻿@startuml
+
+interface IKeyEntity<TKey>{
+    +Id: TKey
+}
+
+note left of IKeyEntity::Id
+      Id of the entity
+    end note
+    
+@enduml

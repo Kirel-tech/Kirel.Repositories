@@ -1,0 +1,9 @@
+﻿@startuml
+
+!include Interfaces/IKirelGenericEntityFrameworkRepository.puml
+
+class KirelGenericEntityFrameworkRepository<KeyType, EntityType>
+
+ KirelGenericEntityFrameworkRepository .down.|> IKirelGenericEntityFrameworkRepository
+
+@enduml
