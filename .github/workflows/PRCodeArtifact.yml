@@ -1,0 +1,50 @@
+﻿---
+name: PRCodeArtifact
+on:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  pr_build_check:
+    name: PR build checks
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      - name: Build
+        run: |
+          dotnet build src
+  pack:
+    name: Pack source code
+    needs: pr_build_check
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: read
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v3
+        with:
+          path: 'pr'
+      - name: Replace source code to out
+        run: |
+          mkdir out && mv pr/src out/src
+      - name: Pack PR info
+        run: |
+          echo "${{ github.run_number }}"  >> out/pr_run_number
+          echo "${{ github.event.pull_request.number }}" >> out/pr_number
+          echo -n ${{ github.event.pull_request.head.sha }} > out/pr_sha
+      - name: Upload Kirel.Repositories PR source code as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Kirel.Repositories-DANGER-pr${{ github.event.pull_request.number }}
+          path: out/*

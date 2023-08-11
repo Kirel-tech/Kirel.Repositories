@@ -1,0 +1,84 @@
+﻿---
+name: PRNugetClean
+on:
+  workflow_run:
+    workflows:
+      - "PRPreClean"
+    types:
+      - completed
+
+jobs:
+  pr_info:
+    name: Determine PR number and SHA
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+    outputs:
+      pr_num: ${{ steps.vars.outputs.pr_num }}
+      pr_sha: ${{ steps.vars.outputs.pr_sha }}
+    steps:
+      - name: Download PR clean artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run --repo ${{ github.repository }} download ${{ github.event.workflow_run.id }}
+      - name: Display structure of downloaded files
+        run: ls -R
+      - name: Setup output vars
+        id: vars
+        run: |
+          echo "pr_num=$(cat cleanup-pr*/pr_number)" >> $GITHUB_OUTPUT
+          echo "pr_sha=$(cat cleanup-pr*/pr_sha)" >> $GITHUB_OUTPUT
+  build:
+    name: Remove nuget package
+    permissions:
+      checks: write
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [ Core, EntityFramework ]
+    needs: pr_info
+    steps:
+      - name: Link PR Check
+        id: pr_check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            args = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: "${{ needs.pr_info.outputs.pr_sha }}",
+              name: "NuGet / ${{ matrix.package }} Cleanup",
+              status: 'in_progress',
+            };
+            console.log("Arguments:", args);
+            let result = await github.rest.checks.create(args);
+            console.log("Result:", result);
+            return {
+              check_run_id: result.data.id
+            };
+      - name: Remove uploaded PR versions
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          versions=$(curl -s https://azuresearch-usnc.nuget.org/query\?q\=packageid:Kirel.Repositories.${{ matrix.package }}\&prerelease\=true | jq -r ".data[0].versions[].version" | grep "DANGER-pr${{ needs.pr_info.outputs.pr_num }}" || :)
+          for version in $versions 
+          do
+            dotnet nuget delete Kirel.Repositories.${{ matrix.package }} $version --non-interactive -k ${NUGET_API_KEY} -s nuget.org
+          done
+      - name: Update PR Check
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            let args = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              check_run_id: ${{ fromJSON(steps.pr_check.outputs.result).check_run_id }},
+              status: 'completed',
+              conclusion: '${{ job.status }}'
+            };
+            console.log("Arguments:", args);
+            let result = await github.rest.checks.update(args);
+            console.log("Result:", result);
