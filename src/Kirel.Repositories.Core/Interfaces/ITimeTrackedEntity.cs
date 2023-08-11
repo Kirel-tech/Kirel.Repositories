@@ -1,4 +1,4 @@
-﻿namespace Kirel.Repositories.Interfaces;
+﻿namespace Kirel.Repositories.Core.Interfaces;
 
 /// <summary>
 /// Interface containing fields with date of creation and updating of the entity

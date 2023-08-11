@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kirel.Repositories", "Kirel.Repositories\Kirel.Repositories.csproj", "{6CC33CD8-4911-4016-8058-DC7FF957810A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kirel.Repositories.EntityFramework", "Kirel.Repositories.EntityFramework\Kirel.Repositories.EntityFramework.csproj", "{6CC33CD8-4911-4016-8058-DC7FF957810A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kirel.Repositories.Core", "Kirel.Repositories.Core\Kirel.Repositories.Core.csproj", "{0887AB02-B7B3-4E34-891F-2C5ACCB3650D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{6CC33CD8-4911-4016-8058-DC7FF957810A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CC33CD8-4911-4016-8058-DC7FF957810A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CC33CD8-4911-4016-8058-DC7FF957810A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0887AB02-B7B3-4E34-891F-2C5ACCB3650D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0887AB02-B7B3-4E34-891F-2C5ACCB3650D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0887AB02-B7B3-4E34-891F-2C5ACCB3650D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0887AB02-B7B3-4E34-891F-2C5ACCB3650D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

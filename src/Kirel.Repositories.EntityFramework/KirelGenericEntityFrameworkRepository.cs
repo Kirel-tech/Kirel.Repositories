@@ -1,25 +1,28 @@
 ﻿using System.Linq.Expressions;
-using Kirel.Repositories.Interfaces;
-using Kirel.Repositories.Sorts;
+using Kirel.Repositories.Core.Interfaces;
+using Kirel.Repositories.Core.Models;
 using Kirel.Shared;
 using Microsoft.EntityFrameworkCore;
 
-namespace Kirel.Repositories.Infrastructure.Generics;
+namespace Kirel.Repositories.EntityFramework;
 
 /// <summary>
-/// Generalized Repository class type 
+/// Implementation of IKirelGenericEntityFrameworkRepository interface via Entity
 /// </summary>
-public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : IKirelGenericEntityFrameworkRepository<TKey, TEntity> 
-    where TEntity : class, ICreatedAtTrackedEntity, IKeyEntity<TKey> 
+/// <typeparam name="TKey"></typeparam>
+/// <typeparam name="TEntity"></typeparam>
+/// <typeparam name="TDbContext"></typeparam>
+public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : IKirelGenericEntityRepository<TKey, TEntity> 
+    where TEntity : class, ICreatedAtTrackedEntity, IKeyEntity<TKey>
     where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
     where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
-    internal virtual IQueryable<TEntity> _reader
+    internal virtual IQueryable<TEntity> Reader
     {
-        get => _writer.AsQueryable();
+        get => Writer.AsQueryable();
     }
-    internal virtual DbSet<TEntity> _writer
+    internal virtual DbSet<TEntity> Writer
     {
         get => _dbContext.Set<TEntity>();
     }
@@ -38,7 +41,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     /// <returns>Created Entity</returns>
     public async Task<TEntity> Insert(TEntity entity)
     {
-        _writer.Add(entity);
+        Writer.Add(entity);
         _dbContext.Entry(entity).State = EntityState.Added;
         await _dbContext.SaveChangesAsync();
         return entity;
@@ -50,7 +53,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     /// <returns>Entity</returns>
     public async Task<TEntity> GetById(TKey id)
     {
-        var entity = await _reader.FirstOrDefaultAsync(e => e.Id.Equals(id));
+        var entity = await Reader.FirstOrDefaultAsync(e => e.Id.Equals(id));
         if (entity == null)
             throw new KeyNotFoundException($"Entity with specified id {id} was not found");
         return entity;
@@ -64,7 +67,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
         var entity = await GetById(id);
         if (entity == null)
             throw new KeyNotFoundException($"Entity with specified id {id} was not found");
-        _writer.Remove(entity);
+        Writer.Remove(entity);
         await _dbContext.SaveChangesAsync();
     }
     /// <summary>
@@ -74,7 +77,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     /// <returns>Updated entity</returns>
     public async Task<TEntity> Update(TEntity entity)
     {
-        _writer.Attach(entity);
+        Writer.Attach(entity);
         _dbContext.Entry(entity).State = EntityState.Modified;
         await _dbContext.SaveChangesAsync();
         return entity;
@@ -92,7 +95,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, 
             IQueryable<TEntity>>? includes = null, int page = 0, int pageSize = 0)
     {
-        IQueryable<TEntity> query = _reader;
+        IQueryable<TEntity> query = Reader;
         if (expression != null)
             query = query.Where(expression);
         if (includes != null)
@@ -158,8 +161,8 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     public async Task<int> Count(Expression<Func<TEntity, bool>>? expression)
     {
         if (expression != null)
-            return await _reader.Where(expression).CountAsync();
-        return await _reader.CountAsync();
+            return await Reader.Where(expression).CountAsync();
+        return await Reader.CountAsync();
     }
     /// <summary>
     /// Count Elements with search string (search in all fields)
