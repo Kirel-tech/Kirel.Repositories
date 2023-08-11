@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <PackageVersion>1.0.3$(VersionSuffix)</PackageVersion>
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>disable</Nullable>
+        <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
@@ -11,6 +12,10 @@
     <ItemGroup>
       <PackageReference Include="Kirel.Shared" Version="0.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Kirel.Repositories.Core\Kirel.Repositories.Core.csproj" />
     </ItemGroup>
 
 </Project>

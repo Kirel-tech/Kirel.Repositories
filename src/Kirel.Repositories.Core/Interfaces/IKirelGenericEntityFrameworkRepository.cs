@@ -1,14 +1,14 @@
 ﻿using System.Linq.Expressions;
-using Kirel.Repositories.Sorts;
+using Kirel.Repositories.Core.Models;
 
-namespace Kirel.Repositories.Interfaces;
+namespace Kirel.Repositories.Core.Interfaces;
 
 /// <summary>
 /// Interface for generic repository
 /// </summary>
 /// <typeparam name="TKey">Type of special entity key</typeparam>
 /// <typeparam name="TEntity">Type of entity</typeparam>
-public interface IKirelGenericEntityFrameworkRepository<in TKey, TEntity> 
+public interface IKirelGenericEntityRepository<in TKey, TEntity> 
     where TEntity : class, ICreatedAtTrackedEntity, IKeyEntity<TKey> 
     where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
 {

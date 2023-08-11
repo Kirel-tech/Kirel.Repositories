@@ -1,4 +1,4 @@
-﻿namespace Kirel.Repositories.Sorts;
+﻿namespace Kirel.Repositories.Core.Models;
 
 /// <summary>
 /// Sorting values

@@ -1,4 +1,4 @@
-﻿namespace Kirel.Repositories.Interfaces;
+﻿namespace Kirel.Repositories.Core.Interfaces;
 
 /// <summary>
 /// A class containing a field of special entity key
