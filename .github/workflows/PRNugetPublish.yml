@@ -1,0 +1,131 @@
+---
+name: PRNugetPublish
+on:
+  workflow_run:
+    workflows:
+      - "PRCodeArtifact"
+    types:
+      - completed
+
+jobs:
+  pr_info:
+    name: Determine PR number and SHA
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+    outputs:
+      pr_num: ${{ steps.vars.outputs.pr_num }}
+      pr_run_num: ${{ steps.vars.outputs.pr_run_num }}
+      pr_sha: ${{ steps.vars.outputs.pr_sha }}
+      pr_prefix: ${{ steps.vars.outputs.pr_prefix }}
+    steps:
+      - name: Download PR source code artifact
+        id: download-pr-artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run --repo ${{ github.repository }} download ${{ github.event.workflow_run.id }}
+      - name: Display structure of downloaded files
+        run: ls -R
+      - name: Setup output vars
+        id: vars
+        run: |
+          echo "pr_num=$(cat Kirel.Repositories*/pr_number)" >> $GITHUB_OUTPUT
+          echo "pr_run_num=$(cat Kirel.Repositories*/pr_run_number)" >> $GITHUB_OUTPUT
+          echo "pr_sha=$(cat Kirel.Repositories*/pr_sha)" >> $GITHUB_OUTPUT
+          echo "pr_prefix=-DANGER-pr$(cat Kirel.Repositories*/pr_number)-$(cat Kirel.Repositories*/pr_run_number)"  >> $GITHUB_OUTPUT
+      - name: Replace source code to src dir
+        run: |
+          mv Kirel.Repositories*/src src
+          rm -rf Kirel.Repositories*
+      - name: Checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: 'main'
+          path: 'main'
+      - name: Save source code to cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            src
+            main
+          key: src-${{ steps.vars.outputs.pr_sha }}
+  build:
+    name: Build and publish
+    permissions:
+      checks: write
+    runs-on: ubuntu-22.04
+    needs: pr_info
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [ Core, EntityFramework ]
+    env:
+      RUN_ID: ${{ github.event.workflow_run.id }}
+    steps:
+      - name: Source cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            src
+            main
+          key: src-${{ needs.pr_info.outputs.pr_sha }}
+      - name: Display structure of cached files
+        run: ls -R
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+      - name: Link PR Check
+        id: pr_check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            args = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: "${{ needs.pr_info.outputs.pr_sha }}",
+              name: "NuGet / ${{ matrix.package }} Upload",
+              status: 'in_progress',
+            };
+            console.log("Arguments:", args);
+            let result = await github.rest.checks.create(args);
+            console.log("Result:", result);
+            return {
+              check_run_id: result.data.id
+            };
+      - name: Version check
+        run: |
+          curr_ver=$(cat main/src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj | grep PackageVersion |sed s/'\s'//g | sed 's/<\/PackageVersion>//g' | sed 's/<PackageVersion>//g')
+          pr_ver=$(cat src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj | grep PackageVersion |sed s/'\s'//g | sed 's/<\/PackageVersion>//g' | sed 's/<PackageVersion>//g')
+          if [[ "$curr_ver" != "$pr_ver" ]]; then echo "::error::${{ matrix.package }}: incorrect version" && exit 1; fi
+      - name: Build
+        run: |
+          dotnet restore src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
+          dotnet build --version-suffix ${{ needs.pr_info.outputs.pr_prefix }} src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
+          dotnet pack -o ./packages --version-suffix ${{ needs.pr_info.outputs.pr_prefix }} src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
+      - name: Publish
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push packages/*.nupkg -k ${NUGET_API_KEY} -s nuget.org
+      - name: Update PR Check
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            let args = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              check_run_id: ${{ fromJSON(steps.pr_check.outputs.result).check_run_id }},
+              status: 'completed',
+              conclusion: '${{ job.status }}'
+            };
+            console.log("Arguments:", args);
+            let result = await github.rest.checks.update(args);
+            console.log("Result:", result);
