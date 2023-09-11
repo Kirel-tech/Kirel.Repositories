@@ -18,11 +18,17 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     where TDbContext : DbContext
 {
     private readonly TDbContext _dbContext;
-    internal virtual IQueryable<TEntity> Reader
+    /// <summary>
+    /// Reader field for read access
+    /// </summary>
+    protected virtual IQueryable<TEntity> Reader
     {
         get => Writer.AsQueryable();
     }
-    internal virtual DbSet<TEntity> Writer
+    /// <summary>
+    /// Writer field for write access
+    /// </summary>
+    protected virtual DbSet<TEntity> Writer
     {
         get => _dbContext.Set<TEntity>();
     }
