@@ -17,7 +17,10 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     where TKey :  IComparable, IComparable<TKey>, IEquatable<TKey>
     where TDbContext : DbContext
 {
-    private readonly TDbContext _dbContext;
+    /// <summary>
+    /// Db context
+    /// </summary>
+    protected readonly TDbContext DbContext;
     /// <summary>
     /// Reader field for read access
     /// </summary>
@@ -30,7 +33,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     /// </summary>
     protected virtual DbSet<TEntity> Writer
     {
-        get => _dbContext.Set<TEntity>();
+        get => DbContext.Set<TEntity>();
     }
     /// <summary>
     /// GenericRepository constructor
@@ -38,7 +41,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     /// <param name="context">DbContext</param>
     public KirelGenericEntityFrameworkRepository(TDbContext context)
     {
-        _dbContext = context;
+        DbContext = context;
     }
     /// <summary>
     /// Add new Entity
@@ -48,8 +51,8 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     public async Task<TEntity> Insert(TEntity entity)
     {
         Writer.Add(entity);
-        _dbContext.Entry(entity).State = EntityState.Added;
-        await _dbContext.SaveChangesAsync();
+        DbContext.Entry(entity).State = EntityState.Added;
+        await DbContext.SaveChangesAsync();
         return entity;
     }
     /// <summary>
@@ -74,7 +77,7 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
         if (entity == null)
             throw new KeyNotFoundException($"Entity with specified id {id} was not found");
         Writer.Remove(entity);
-        await _dbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync();
     }
     /// <summary>
     /// Updating entity
@@ -84,8 +87,8 @@ public class KirelGenericEntityFrameworkRepository<TKey, TEntity, TDbContext> : 
     public async Task<TEntity> Update(TEntity entity)
     {
         Writer.Attach(entity);
-        _dbContext.Entry(entity).State = EntityState.Modified;
-        await _dbContext.SaveChangesAsync();
+        DbContext.Entry(entity).State = EntityState.Modified;
+        await DbContext.SaveChangesAsync();
         return entity;
     }
     /// <summary>
