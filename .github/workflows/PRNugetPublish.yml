@@ -107,7 +107,7 @@ jobs:
       - name: Build
         run: |
           dotnet restore src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
-          dotnet build --version-suffix ${{ needs.pr_info.outputs.pr_prefix }} src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
+          dotnet build --configuration Release --version-suffix ${{ needs.pr_info.outputs.pr_prefix }} src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
           dotnet pack -o ./packages --version-suffix ${{ needs.pr_info.outputs.pr_prefix }} src/Kirel.Repositories.${{ matrix.package }}/Kirel.Repositories.${{ matrix.package }}.csproj
       - name: Publish
         env:
